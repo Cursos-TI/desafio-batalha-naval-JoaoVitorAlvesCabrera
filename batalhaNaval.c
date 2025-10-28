@@ -36,84 +36,85 @@
     // 1 1 1 1 1
     // 0 0 1 0 0
 
-    #include <stdio.h>
-
-int main() {
-
 #define TAM 10       // Tamanho fixo do tabuleiro (10x10)
 #define TAM_NAVIO 3  // Cada navio ocupa 3 posições
+#define OCUPADO 3    // Valor para representar partes de navios
+#define AGUA 0       // Valor para representar água
 
-    int tabuleiro[TAM][TAM]; // Matriz que representa o tabuleiro
-    int i, j;
+// === Função auxiliar: verifica se uma posição está dentro do tabuleiro ===
 
-    // ===  Inicializar o tabuleiro com 0 agua ===
+int dentroLimite(int linha, int coluna) {
+return (linha >= 0 && linha < TAM && coluna >= 0 && coluna < TAM);
+}
 
-    for (i = 0; i < TAM; i++) {
-    for (j = 0; j < TAM; j++) {
-    tabuleiro[i][j] = 0;
-    }
-    }
+// === Função para verificar sobreposição antes de posicionar ===
 
-    // ===  Coordenadas iniciais dos navios ===
+int verificaSobreposicao(int tab[TAM][TAM], int linha, int coluna, int dLinha, int dColuna) {
+for (int i = 0; i < TAM_NAVIO; i++) {
+int l = linha + i * dLinha;
+int c = coluna + i * dColuna;
+if (!dentroLimite(l, c) || tab[l][c] == OCUPADO)
+return 1; // Sobreposição ou fora dos limites
+}
+ return 0;
+}
 
-    // Navio 1: horizontal
+// === Função para posicionar navio com segurança ===
 
-    int linhaNavio1 = 1; // linha inicial
-    int colunaNavio1 = 3; // coluna inicial
+void posicionaNavio(int tab[TAM][TAM], int linha, int coluna, int dLinha, int dColuna) {
+for (int i = 0; i < TAM_NAVIO; i++) {
+int l = linha + i * dLinha;
+int c = coluna + i * dColuna;
+tab[l][c] = OCUPADO;
+}
+}
 
-    // Navio 2: vertical
+int main() {
+int tabuleiro[TAM][TAM] = {0};
 
-    int linhaNavio2 = 3; // linha inicial
-    int colunaNavio2 = 5; // coluna inicial
+// === Coordenadas iniciais dos navios ===
 
-    // ===  Validacao de limites ===
+int linhaH = 1, colunaH = 2; // horizontal 
+int linhaV = 5, colunaV = 6; // vertical 
+int linhaD1 = 2, colunaD1 = 2; // diagonal principal 
+int linhaD2 = 6, colunaD2 = 8; // diagonal secundária 
 
-    // (Verifica se os navios cabem dentro do tabuleiro)
+// === Navio horizontal ===
 
-    if (colunaNavio1 + TAM_NAVIO > TAM) {
-    printf("Erro: o navio horizontal ultrapassa os limites do tabuleiro.");
-    return 1;
-    }
-    if (linhaNavio2 + TAM_NAVIO > TAM) {
-    printf("Erro: o navio vertical ultrapassa os limites do tabuleiro.\n");
-    return 1;
-    }
+if (!verificaSobreposicao(tabuleiro, linhaH, colunaH, 0, 1))
+posicionaNavio(tabuleiro, linhaH, colunaH, 0, 1);
+else
+printf("não foi possível posicionar navio horizontal (sobreposição ou fora dos limites).\n");
 
-    // ===  Posicionar o navio horizontal ===
+// === Navio vertical ===
 
-    for (i = 0; i < TAM_NAVIO; i++) {
-    tabuleiro[linhaNavio1][colunaNavio1 + i] = 3;
-    }
+if (!verificaSobreposicao(tabuleiro, linhaV, colunaV, 1, 0))
+posicionaNavio(tabuleiro, linhaV, colunaV, 1, 0);
+else
+printf("não foi possível posicionar navio vertical.\n");
 
-    // === Verificar sobreposição antes de posicionar o navio vertical ===
+// === Navio diagonal principal ===
 
-    int sobreposicao = 0;
-    for (i = 0; i < TAM_NAVIO; i++) {
-    if (tabuleiro[linhaNavio2 + i][colunaNavio2] == 3) {
-    sobreposicao = 1;
-    }
-    }
+if (!verificaSobreposicao(tabuleiro, linhaD1, colunaD1, 1, 1))
+posicionaNavio(tabuleiro, linhaD1, colunaD1, 1, 1);
+else
+printf("não foi possível posicionar navio diagonal principal.\n");
 
-    if (sobreposicao) {
-    printf("Erro: os navios se sobrepõem.\n");
-    return 1;
-    }
+// === Navio diagonal secundária ===
 
-    // === Posicionar o navio vertical ===
+if (!verificaSobreposicao(tabuleiro, linhaD2, colunaD2, 1, -1))
+posicionaNavio(tabuleiro, linhaD2, colunaD2, 1, -1);
+else
+printf("não foi possível posicionar navio diagonal secundária.\n");
 
-    for (i = 0; i < TAM_NAVIO; i++) {
-    tabuleiro[linhaNavio2 + i][colunaNavio2] = 3;
-    }
+// === Exibir o tabuleiro ===
 
-    // ===  Exibir o tabuleiro ===
-
-    printf("\n=== TABULEIRO DE BATALHA NAVAL ===\n");
-    for (i = 0; i < TAM; i++) {
-    for (j = 0; j < TAM; j++) {
-    printf("%d ", tabuleiro[i][j]);
-    }
-    printf("\n");
-    }
+printf("\n=== TABULEIRO DE BATALHA NAVAL ===\n\n");for (int i = 0; i < TAM; i++) {
+for (int j = 0; j < TAM; j++) {
+printf("%d ", tabuleiro[i][j]);
+}
+printf("\n");
+}
 
     return 0;
 }
